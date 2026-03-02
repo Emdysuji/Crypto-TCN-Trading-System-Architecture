@@ -1,16 +1,20 @@
 ## Crypto TCN Trading System (Architecture Showcase)
 
-This repository presents the architecture and system design of a deep-learning-based cryptocurrency trading system using a Temporal Convolutional Network (TCN).
+This repository presents the high-level architecture and engineering design of a deep-learning-based cryptocurrency trading system built around a Temporal Convolutional Network (TCN).
 
-The full trading engine and model training code are proprietary and not publicly available.
+The system is designed for large-scale feature engineering, memory-efficient dataset streaming, real-time inference, and automated risk-managed trade execution.
 
-This repository demonstrates:
-- Large-scale feature engineering pipeline
-- Lazy Parquet row-group streaming architecture
-- TCN-based financial forecasting model
-- Custom trading-focused loss functions
-- Real-time inference integration
-- Risk management and order execution architecture
+The full production trading engine and model training pipeline are proprietary and not part of this public repository.
 
-For collaboration or licensing inquiries:
-📩 emdi.osuji@gmail.com
+### Key Engineering Highlights
+
+* Large-scale feature engineering with technical and statistical indicators
+* Lazy Parquet row-group streaming for memory efficiency
+* Multi-target TCN-based financial forecasting
+* Trading-aware custom loss functions
+* Real-time inference and signal generation
+* Structured risk management and execution pipeline
+
+For collaboration, licensing, or commercial discussions:
+📩 [emdi.osuji@gmail.com](mailto:emdi.osuji@gmail.com)
+
