@@ -1,121 +1,117 @@
 <div align="center">
 
-# 🏗️ Crane Signal AI
+# 📈 Crypto TCN Trading System
 
-**Real-time recognition of crane hand signals from live video, using deep learning and TensorFlow Lite.**
+### Architecture Showcase
 
-![Python](https://img.shields.io/badge/Python-3.x-3776AB?logo=python&logoColor=white)
-![TensorFlow Lite](https://img.shields.io/badge/TensorFlow%20Lite-edge%20ready-FF6F00?logo=tensorflow&logoColor=white)
-![Model](https://img.shields.io/badge/Model-MoViNet--A2-4285F4)
-![Flask](https://img.shields.io/badge/API-Flask-000000?logo=flask&logoColor=white)
+**A deep-learning crypto trading system built around a Temporal Convolutional Network (TCN), with large-scale feature engineering, streaming datasets, real-time inference and risk-managed execution.**
+
+![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)
+![Deep Learning](https://img.shields.io/badge/Model-Temporal%20Convolutional%20Network-FF6F00)
+![Data](https://img.shields.io/badge/Data-Parquet%20streaming-50ABF1)
+![Exchange](https://img.shields.io/badge/Exchange-Binance%20Futures-F0B90B?logo=binance&logoColor=black)
 ![License](https://img.shields.io/badge/License-MIT-2ea44f)
+
+[Architecture](ARCHITECTURE.md) · [Trade flow](SYSTEM_FLOW.md) · [Example output](example_prediction_output.json) · [Contact](#-contact)
 
 </div>
 
-<!-- TODO: add a demo GIF or screenshot here, e.g. ![Demo](docs/demo.gif) -->
-
 ---
 
-## 🔍 Overview
+> [!IMPORTANT]
+> **This repository is an architecture showcase.** It presents the high-level engineering design of the system. The full production trading engine, feature-engineering engine and model training pipeline are **proprietary and not included**.
 
-**Crane Signal AI** is a computer-vision system that recognizes **standardized crane hand signals** from a webcam stream or recorded clips. It uses a lightweight [MoViNet](https://arxiv.org/abs/2103.11511) video model trained on labeled gesture data and converted to **TensorFlow Lite** so it can run on edge devices and safety systems.
+## 🎯 What this system does
 
-## 💡 Use cases
+The system collects market data, turns it into model-ready features, trains a TCN to forecast price movement, and uses those forecasts to open, manage and close trades automatically, all behind a structured risk-management layer.
 
-| Today | Future possibilities |
+## ✨ Key engineering highlights
+
+| | Highlight |
 |---|---|
-| 🦺 **Construction safety monitoring**: flag ambiguous or unsafe signals in real time | 🏗️ **AI-controlled cranes** that respond to recognized hand signals |
-| 📹 **Operator assistance**: a second set of eyes in noisy, high-risk sites | 🧠 **Smart surveillance** using existing site camera feeds |
-| 🧪 **Dataset labeling**: auto-label crane videos for better training data | 🕹️ **Remote operation** through gesture input |
-| | 👓 **AR glasses / helmet HUD** showing detected signals live |
+| 🧮 | **Large-scale feature engineering** with technical and statistical indicators (RSI, MACD, Bollinger Bands, ATR, rolling statistics, lags and candle structure) |
+| 💾 | **Lazy Parquet row-group streaming**, so datasets larger than memory can be used for training |
+| 🧠 | **Multi-target TCN forecasting** of High, Low and Close |
+| 🎯 | **Trading-aware custom loss functions** |
+| ⚡ | **Real-time inference** with a rolling-window engine that generates signals |
+| 🛡️ | **Structured risk management**: position sizing, adaptive leverage, dynamic take-profit and stop-loss, break-even fallback |
+| 🔄 | **Server time synchronization** to prevent signing and API drift errors |
 
-## 🧠 Model
+## 🏛️ System overview
 
-| Component | Details |
+```mermaid
+flowchart TD
+    A[Binance Futures API] --> B[Data Collection Layer]
+    B --> C[Feature Engineering<br/>indicators, rolling stats, lags]
+    C --> D[(Parquet Dataset Storage<br/>row-group streaming)]
+    D --> E[TCN Training Pipeline<br/>custom loss functions]
+    E --> F[Trained Model .keras]
+    F --> G[Real-Time Inference<br/>rolling window engine]
+    G --> H[Risk Management Engine<br/>TP / SL / break-even]
+    H --> I[Order Execution Layer<br/>+ time synchronization]
+```
+
+For a component-by-component breakdown, see **[ARCHITECTURE.md](ARCHITECTURE.md)**.
+
+## 🔄 Example trade flow
+
+Every cycle follows the same loop, described in **[SYSTEM_FLOW.md](SYSTEM_FLOW.md)**:
+
+```mermaid
+flowchart LR
+    A[Fetch latest<br/>3m candles] --> B[Compute<br/>features]
+    B --> C[Scale and build<br/>rolling window]
+    C --> D[Predict High / Low / Close<br/>log-returns]
+    D --> E[Convert to<br/>price targets]
+    E --> F[Evaluate long<br/>or short bias]
+    F --> G[Apply risk<br/>filters]
+    G --> H[Execute<br/>trade]
+    H --> I[Monitor ROI and<br/>adjust stop-loss]
+```
+
+## 🧩 Core components
+
+| Layer | Responsibility |
 |---|---|
-| Base model | MoViNet-A2 |
-| Input resolution | 224 × 224 |
-| Frames per clip | 30 |
-| Modes | Offline (clip-based) and streaming (frame-by-frame) |
-| Export format | TensorFlow Lite (`.tflite`) |
+| **Data collection** | Historical and live OHLCV from Binance Futures, multiple timeframes, rate limiting and batching |
+| **Feature engineering** | Technical indicators, rolling statistics and volatility, lag and candle-structure features, normalized model-ready sets |
+| **Model training** | TCN architecture, multi-target forecasting, custom loss functions, Parquet streaming |
+| **Inference engine** | Loads the trained model, builds rolling feature windows in real time, produces forward price projections and directional signals |
+| **Risk management** | Position sizing, adaptive leverage, dynamic take-profit and stop-loss, break-even fallback, ROI-based monitoring |
+| **Order execution** | Market and limit orders, position monitoring, conditional orders, server timestamp sync, continuous monitoring of active trades |
 
-## ✨ Features
+## 🏗️ Infrastructure considerations
 
-- ✅ Real-time crane gesture classification
-- ✅ **Streaming mode**: frame-by-frame inference with memory states
-- ✅ **Offline mode**: clip-based inference
-- ✅ TensorFlow Lite models for edge deployment
-- ✅ Flask web API with live video overlay
-- ✅ Dataset augmentation with Albumentations
-- ✅ Prediction visualization tools
+- Binance server-time synchronization for accurate request signing
+- Modular separation of training and execution environments
+- Parquet row-group streaming for large-dataset efficiency
+- Environment-based configuration management
+- Fault tolerance and exception handling during live trading
 
-## 🚀 Quick start
+## 📂 What's in this repository
 
-```bash
-git clone https://github.com/Emdysuji/CraneSignalAI.git
-cd CraneSignalAI
+| File | Purpose |
+|---|---|
+| [`ARCHITECTURE.md`](ARCHITECTURE.md) | Full architecture and component descriptions |
+| [`SYSTEM_FLOW.md`](SYSTEM_FLOW.md) | Step-by-step example trade flow |
+| [`binance_time.py`](binance_time.py) | Binance server-time synchronization helper |
+| [`example_prediction_output.json`](example_prediction_output.json) | Example of the model's prediction output |
+| [`Images/`](Images) | Diagrams and visuals |
+| [`LICENSE`](LICENSE) | MIT license |
 
-python -m venv .venv
-# Windows: .venv\Scripts\activate    |    Linux/macOS: source .venv/bin/activate
+<!-- TODO: add a screenshot or chart here, e.g. ![Prediction vs actual](Images/your-image-name.png) -->
 
-pip install -r requirements.txt
-```
+## ⚠️ Disclaimer
 
-<!-- TODO: confirm requirements.txt exists in the repo root (it was not in the file list) -->
+This project is shared for educational and demonstration purposes. Trading cryptocurrency, especially with leverage, carries a high risk of loss. Nothing here is financial advice, and past or simulated results do not guarantee future performance.
 
-Run the live **streaming** API (frame-by-frame):
+## 📩 Contact
 
-```bash
-python API/api_live_stream.py
-```
-
-Or the **offline** clip-based API:
-
-```bash
-python API/api_live_base.py
-```
-
-<!-- TODO: confirm the default port and URL to open, then add it here -->
-
-## 📁 Project structure
-
-```
-CraneSignalAI/
-├── API/
-│   ├── api_live_base.py        # Offline clip-based video API
-│   └── api_live_stream.py      # Streaming (frame-by-frame) video API
-├── Models/
-│   ├── model_3_b30.tflite      # Base (non-streaming) model
-│   └── model_3.tflite          # Streaming inference model
-├── utils/
-│   ├── cut_video_clips.py      # Slice video into short labeled segments
-│   └── augment_videos.py       # Run augmentation on the dataset
-├── CraneSignalTraining.ipynb   # Full training + export notebook
-├── requirements.txt
-└── README.md
-```
-
-## 🎓 Training your own model
-
-Open `CraneSignalTraining.ipynb` in Jupyter or Google Colab. It covers loading the labeled clips, augmentation, training MoViNet-A2, and exporting the `.tflite` models into `Models/`.
-
-## 🙏 Acknowledgements
-
-- [TensorFlow Model Garden: MoViNet](https://www.kaggle.com/code/minhdunk/movinet-streaming#Convert-to-TF-Lite)
-- [Albumentations](https://albumentations.ai) for fast image and video augmentation
-- Dataset videos: public crane hand-signal videos on YouTube
-
-## 📄 License
-
-Released under the **MIT License**. See [LICENSE](LICENSE).
-
-## 🧑‍💻 Author
-
-**Michael-David Osuji**, AI Engineer
-[LinkedIn](https://www.linkedin.com/in/michael-david-osuji) · [GitHub](https://github.com/Emdysuji)
+For collaboration, licensing or commercial discussions: **emdi.osuji@gmail.com**
 
 <div align="center">
 
-⭐ If this project is useful to you, consider starring the repo.
+**Michael-David Osuji**, AI Engineer
+[LinkedIn](https://www.linkedin.com/in/michael-david-osuji) · [GitHub](https://github.com/Emdysuji)
 
 </div>
