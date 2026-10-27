@@ -88,13 +88,47 @@ flowchart LR
 - Environment-based configuration management
 - Fault tolerance and exception handling during live trading
 
+## 🔬 Public code sample: exchange time synchronization
+
+Signed requests to an exchange fail when the local clock drifts from the server's. [`binance_time.py`](binance_time.py) is the one real module shared here. It solves that problem:
+
+- Reads Binance Futures server time and computes the offset against the local clock
+- Compensates for network latency by using the midpoint of the request's round trip
+- Re-syncs automatically in a background thread (every 5 minutes by default)
+- Keeps the last good offset if a sync request fails, so trading never blocks on it
+- Is thread-safe and exposes `now_ns()` and `now_ms()` for server-aligned timestamps
+
+```python
+from binance_time import BinanceTimeSync
+
+clock = BinanceTimeSync(sync_interval=300)
+timestamp = clock.now_ms()   # server-aligned time in milliseconds
+```
+
+## 📤 Example prediction output
+
+For each cycle the model produces forward price projections for the next candle, which the risk layer then filters:
+
+```json
+{
+  "symbol": "BTCUSDT",
+  "timeframe": "3m",
+  "current_open_price": 65200.50,
+  "predicted_high": 65420.12,
+  "predicted_low": 64980.33,
+  "predicted_close": 65280.40
+}
+```
+
+*Illustrative values, not real market data or a trading signal.*
+
 ## 📂 What's in this repository
 
 | File | Purpose |
 |---|---|
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | Full architecture and component descriptions |
 | [`SYSTEM_FLOW.md`](SYSTEM_FLOW.md) | Step-by-step example trade flow |
-| [`binance_time.py`](binance_time.py) | Binance server-time synchronization helper |
+| [`binance_time.py`](binance_time.py) | Background Binance server-time synchronization |
 | [`example_prediction_output.json`](example_prediction_output.json) | Example of the model's prediction output |
 | [`Images/`](Images) | Diagrams and visuals |
 | [`LICENSE`](LICENSE) | MIT license |
